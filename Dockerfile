@@ -1,7 +1,7 @@
 FROM debian
 MAINTAINER Matt Koski <maccam912@gmail.com>
 RUN apt-get update && apt-get upgrade -y
-RUN apt-get update && apt-get install vim git build-essential wget screen tmux curl -y
+RUN apt-get update && apt-get install vim git build-essential wget screen tmux curl python -y
 
 RUN mkdir /Development
 RUN cd /Development && git clone git://github.com/joyent/node
