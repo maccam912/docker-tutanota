@@ -11,6 +11,7 @@ RUN rm -rf /Development/node
 
 RUN cd /Development && git clone https://github.com/tutao/tutanota.git
 
+RUN npm install gulp -g
 RUN cd /Development/tutanota/web && npm install && gulp dist && cd build
 
 EXPOSE 80:80
