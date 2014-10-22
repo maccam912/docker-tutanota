@@ -14,45 +14,11 @@ RUN cd /Development && git clone https://github.com/tutao/tutanota.git
 RUN npm install gulp -g
 RUN cd /Development/tutanota/web && npm install && gulp dist && cd build
 
-RUN cat "server {
-    listen       80 default;
-    location / {
-        root   /var/www/tutanota/;
-        index  index.html;
-    }
-}
+RUN cat "server {\n listen       80 default;\n    location / {\n        root   /var/www/tutanota/;\n        index  index.html;\n    }\n}\n\nserver {\n    listen       443 default;\n    location / {\n        root   /var/www/tutanota/;\n        index  index.html;\n    }\n\n    ssl on;\n    ssl_certificate /etc/nginx/ssl/server.crt;\n    ssl_certificate_key /etc/nginx/server.key;\n}" > /etc/nginx/sites-available/tutanota.conf
 
-server {
-    listen       443 default;
-    location / {
-        root   /var/www/tutanota/;
-        index  index.html;
-    }
-    
-    ssl on;
-    ssl_certificate /etc/nginx/ssl/server.crt;
-    ssl_certificate_key /etc/nginx/server.key;
-}" > /etc/nginx/sites-available/tutanota.conf
+RUN cat "#!/bin/bash\nset -ue\n\nmkdir -p /var/www\ncp -r /usr/local/src/tutanota/web/build /var/www/tutanota\n\nrm /etc/nginx/sites-enabled/default\nln -s /etc/nginx/sites-available/tutanota.conf /etc/nginx/sites-enabled/tutanota.conf\n\n/etc/init.d/nginx restart" > hook1.sh && sh hook1.sh
 
-RUN cat "#!/bin/bash
-set -ue
-
-
-mkdir -p /var/www
-cp -r /usr/local/src/tutanota/web/build /var/www/tutanota
-
-rm /etc/nginx/sites-enabled/default
-ln -s /etc/nginx/sites-available/tutanota.conf /etc/nginx/sites-enabled/tutanota.conf
-
-/etc/init.d/nginx restart" > hook1.sh && sh hook1.sh
-
-RUN cat "#!/bin/bash
-set -ue
-
-mkdir -p /etc/nginx/ssl
-
-# create a self-signed certificate in one line
-openssl req -subj '/CN=domain.com/O=My Company Name LTD./C=US' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout /etc/nginx/server.key -out /etc/nginx/ssl/server.crt" > hook2.sh && sh hook2.sh
+RUN cat "#!/bin/bash\nset -ue\n\nmkdir -p /etc/nginx/ssl\n\n# create a self-signed certificate in one line\nopenssl req -subj '/CN=domain.com/O=My Company Name LTD./C=US' -new -newkey rsa:2048 -days 365 -nodes -x509 -keyout /etc/nginx/server.key -out /etc/nginx/ssl/server.crt" > hook2.sh && sh hook2.sh
 
 RUN /etc/init.d/nginx stop
 RUN /etc/init.d/nginx start
